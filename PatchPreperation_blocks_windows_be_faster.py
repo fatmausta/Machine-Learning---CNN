@@ -82,12 +82,19 @@ def PatchMaker(patch_size, window_size, nclasses):
 #        #count non-zero labels 
             if label!= 0 : 
                 nonzero += 1
-            #making your window  intensities a single row
+#            making your window  intensities a single row
             intensities = numpy.reshape(LGE_windows[p],(window_size*window_size))
             intensities = numpy.reshape(intensities, (1,window_size*window_size))
-        
+            
+#        	patch_labels_testing=np.empty((len(LGE_patches)))
+#          patch_labels_testing.reshape((,(len(LGE_patches)))
+			
+            LGE_patches=1000
+            els_testing=np.empty((1,1000))
+			
             if test_slice[0] <= sl <= test_slice[5]:
-                print('yes')
+#                print('yes')
+                patch_labels_testing[:,sl]=label
                 patch_labels_testing=numpy.concatenate((patch_labels_testing,label), axis=0)
                 windowslist_testing =numpy.concatenate((windowslist_testing,intensities), axis=0)
 
@@ -107,11 +114,13 @@ def PatchMaker(patch_size, window_size, nclasses):
     training_data=numpy.uint8(training_data)
     testing_data=numpy.uint8(testing_data)
     
-    numpy.savetxt('training.csv', training_data ,fmt='%s', delimiter=',' ,newline='\r\n') 
-    numpy.savetxt('testing.csv', testing_data ,fmt='%s', delimiter=',' ,newline='\r\n') 
-    print(nonzero)                        
-    
-PatchMaker(3, 25, 5)    
+#    numpy.savetxt('training.csv', training_data ,fmt='%s', delimiter=',' ,newline='\r\n') 
+#    numpy.savetxt('testing.csv', testing_data ,fmt='%s', delimiter=',' ,newline='\r\n') 
+    print(nonzero)   
+    return training_data, testing_data                  
+#    
+
+(trainscar,testscar)=PatchMaker(3, 25, 5)
 #    obj_scarCNN=SimpleITK.SimpleITK.Image()
 #    obj_scarCNN.SetSize(size)
 #    spacing = np.array(list(reversed(LGE.GetSpacing())))
