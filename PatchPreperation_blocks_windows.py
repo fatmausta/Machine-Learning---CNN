@@ -10,6 +10,7 @@ import os
 import numpy as np
 import numpy
 import SimpleITK
+import SimpleITK as sitk
 import matplotlib.pyplot as plt
 from skimage.util import view_as_windows
 from skimage.util import view_as_blocks
@@ -17,11 +18,9 @@ from skimage.util import view_as_blocks
 def PatchMaker(patch_size, window_size, nclasses):  
     #reading mhd images
     LGE = SimpleITK.ReadImage("0485-LGE-cropped.mhd")
-    scar = SimpleITK.ReadImage("0485-myo-cropped.mhd")
-    
+    scar = SimpleITK.ReadImage("0485-scar-cropped.mhd")
     #slice number of theb twsting data
-    test_slice = 39
-        
+    test_slice = range(39,45)
     #convert a SimpleITK object into an array
     LGE_3D = SimpleITK.GetArrayFromImage(LGE)
     scar_3D = SimpleITK.GetArrayFromImage(scar)
@@ -50,12 +49,12 @@ def PatchMaker(patch_size, window_size, nclasses):
     w_pad=patch_size-rem_w      
     rem_h = h_LGE%patch_size
     h_pad=patch_size-rem_h
-      
+    
     patch_labels_training=numpy.empty([1,1])
     patch_labels_testing=numpy.empty([1,1])
     windowslist_training=numpy.empty([1,window_size*window_size])
     windowslist_testing=numpy.empty([1,window_size*window_size])
-    for sl in range(38,50):
+    for sl in range(15,50):
 
         LGE_padded_slice=numpy.lib.pad(LGE_3D[sl,:,:], ((0,h_pad),(0,w_pad)), 'constant', constant_values=(0,0))
         scar_padded_slice=numpy.lib.pad(scar_3D[sl,:,:], ((0,h_pad),(0,w_pad)), 'constant', constant_values=(0,0))
@@ -86,7 +85,8 @@ def PatchMaker(patch_size, window_size, nclasses):
             intensities = numpy.reshape(LGE_windows[p],(window_size*window_size))
             intensities = numpy.reshape(intensities, (1,window_size*window_size))
         
-            if sl == test_slice:
+            if test_slice[0] <= sl <= test_slice[5]:
+                print('yes')
                 patch_labels_testing=numpy.concatenate((patch_labels_testing,label), axis=0)
                 windowslist_testing =numpy.concatenate((windowslist_testing,intensities), axis=0)
 
@@ -110,5 +110,51 @@ def PatchMaker(patch_size, window_size, nclasses):
     numpy.savetxt('testing.csv', testing_data ,fmt='%s', delimiter=',' ,newline='\r\n') 
     print(nonzero)                        
     
+    obj_scarCNN=SimpleITK.SimpleITK.Image()
+    obj_scarCNN.SetSize(size)
+    spacing = np.array(list(reversed(LGE.GetSpacing())))
+    obj_scarCNN.SetSpacing(spacing)
     
+#MEtadata header file
+headertext = 'ObjectType = Image\nNDims = 3\nDimSize = 77 201 187\nElementType = MET_USHORT\nElementDataFile = scarCNN.raw\n'    #(this tag must be last in a MetaImageHeader)
+SimpleITK.WriteImage(scarCNN, '0485-scar-CNN.mhd')
+spacing = np.array(list(reversed(LGE.GetSpacing())))
+
+#set dimensions
+DimSize='DimSize = ' + str(y_pred_multi.shape[0]) + ' ' + str(scarCNN.shape[0]) + ' ' + str(scarCNN.shape[1])# + ' ' + str(scarCNN.shape[2])
+ObjectType = Image
+ElementType = MET_USHORT
+ElementDataFile = scarCNN.raw
+
+ElementSpacing = spacing
+scar = sitk.GetArrayFromImage(LGE)
+img = sitk.GetImageFromArray(scar)
+img.GetSize()
+
+
+#DimSize = scarCNN.shape[0] scarCNN.shape[1] scarCNN.shape[2]
+    
+origin = np.array(list(reversed(LGE.GetOrigin())))
+SimpleITK.Image.GetDepth()
+SimpleITK.Image.GetHeight()
+SimpleITK.Image.GetMetaDataKeys()
+SimpleITK.Image.GetSize()
+SimpleITK.Image.SetSpacing()
+
+SimpleITK.Image.
+SimpleITK.Image
+SimpleITK.Image
+SimpleITK.Image
+key=np.array(list(reversed(LGE.GetMetaDataKeys()))) 
+metadata = LGE.GetMetaData(key[0])
+
+    # Read the spacing along each dimension
+    spacing = np.array(list(reversed(LGE.GetSpacing())))
+    dim=LGE.GetDimension()
+    LGE.GetSize()
+    metadata =(list(reversed(LGE.GetMetaData()))) 
+   
+help(SimpleITK.Image.GetImageFromArray)    
+
+
 #PatchMaker(5, 25, 5)
